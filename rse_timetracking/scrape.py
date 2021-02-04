@@ -1,3 +1,7 @@
+"""
+Scrape version.aalto.fi to assemble statistics about RSE projects. For each
+project, Key Performance Indicators (KPIs) are gathered from the issue tracker.
+"""
 from argparse import ArgumentParser
 import sys
 from collections import defaultdict
@@ -10,11 +14,7 @@ from .kpis import KPI_defs, parse_KPIs
 
 
 def scrape():
-    """
-    Scrape version.aalto.fi to assemble statistics about RSE projects. For each
-    project, Key Performance Indicators (KPIs) are gathered from the issue
-    tracker.
-    """
+    """Main function that serves as the entrypoint to rse_timetracking."""
     # Parse command line arguments
     p = ArgumentParser(description=__doc__)
     p.add_argument('year', type=int, help='The year to scrape.')
