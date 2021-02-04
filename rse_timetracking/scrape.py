@@ -10,7 +10,7 @@ import gitlab
 import pandas as pd
 
 from .time import time_to_seconds, parse_time_spent
-from .kpis import KPI_defs, parse_KPIs
+from .kpis import parse_KPIs
 
 
 def scrape():
@@ -71,12 +71,16 @@ def scrape():
     else:
         repo = gl.projects.get(repo[0]['id'])
 
-    # Create an empty python dataframe and define the columns.
-    # This will contain the issue numer and name, the amount of RSE time spent,
-    # all the KPIs defined above and unit and funding information.
-    data = pd.DataFrame([], columns=["#", "Project", "RSE time spent"] +
-                                    [KPI['name'] for KPI in KPI_defs] +
-                                    ["Unit", "Funding", "Closed"])
+    # # Create an empty python dataframe and define the columns.
+    # # This will contain the issue numer and name, the amount of RSE time spent,
+    # # all the KPIs defined above and unit and funding information.
+    # data = pd.DataFrame([], columns=["#", "Project", "RSE time spent"] +
+    #                                 [KPI['name'] for KPI in KPI_defs] +
+    #                                 ["Unit", "Funding", "Closed"])
+    issue_records = []
+
+    print(f' # Issue title                                                          Total time spent', flush=True) 
+    print(f'----------------------------------------------------------------------------------------', flush=True) 
 
     # Check all issues in case they were active in the desired year
     for issue in repo.issues.list(all=True):
@@ -120,11 +124,10 @@ def scrape():
             if note.body == "closed":
                 is_closed = True
 
-        # Tally up everything
-        total_time_spent = sum(time_spent.values())
-        KPI_sums = []
-        for KPI in KPI_defs:
-            KPI_sums.append(sum(KPIs[KPI['name']].values()))
+        # # Tally up everything
+        # KPI_sums = []
+        # for KPI in KPI_defs:
+        #     KPI_sums.append(sum(KPIs[KPI['name']].values()))
 
         # Done with notes
         # Now check the labels
@@ -133,19 +136,34 @@ def scrape():
             namespace, content = label.split('::')
             if namespace == "Unit":
                 unit = content
-            if namespace == "Funding":
+            elif namespace == "Funding":
                 funding = content
 
         # Issue number, time spent, time saved, etc.
         if active:
-            data.loc[len(data)] = ([issue.iid, issue.title, total_time_spent] +
-                                   KPI_sums + [unit, funding, is_closed])
+            issue_record = dict(
+                iid=issue.iid,
+                project=issue.title,
+                unit=unit,
+                funding=funding,
+                is_closed=is_closed,
+            )
 
-    # create a csv_file
+            for KPI_name, KPI_values in KPIs.items():
+                for author, KPI_value in KPI_values.items():
+                    issue_record[f'{KPI_name} by {author}'] = KPI_value
+
+            for author, time in time_spent.items():
+                issue_record[f'Time spent by {author}'] = time
+
+            issue_records.append(issue_record)
+
+            total_time_spent = sum(time_spent.values())
+            print(f'{issue.iid:02d} {issue.title:<77} {total_time_spent:>7d}',
+                  flush=True)
+
+    data = pd.DataFrame(issue_records)
     data.to_csv(args.output, index=False)
-
-    # Display the dataframe as a table
-    print(data)
 
     # Thank you and goodbye!
     print(f'Data was written to: {args.output}')
