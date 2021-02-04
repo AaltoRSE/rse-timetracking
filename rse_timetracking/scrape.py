@@ -79,8 +79,8 @@ def scrape():
     #                                 ["Unit", "Funding", "Closed"])
     issue_records = []
 
-    print(f' # Issue title                                                          Total time spent', flush=True) 
-    print(f'----------------------------------------------------------------------------------------', flush=True) 
+    print(f' # Issue title                                                  Total time spent', flush=True) 
+    print(f'--------------------------------------------------------------------------------', flush=True) 
 
     # Check all issues in case they were active in the desired year
     for issue in repo.issues.list(all=True):
@@ -159,11 +159,11 @@ def scrape():
             issue_records.append(issue_record)
 
             total_time_spent = sum(time_spent.values())
-            print(f'{issue.iid:02d} {issue.title:<77} {total_time_spent:>7d}',
+            print(f'{issue.iid:03d} {issue.title:<68} {total_time_spent:>7d}',
                   flush=True)
 
     data = pd.DataFrame(issue_records)
     data.to_csv(args.output, index=False)
 
     # Thank you and goodbye!
-    print(f'Data was written to: {args.output}')
+    print(f'\nData was written to: {args.output}')
