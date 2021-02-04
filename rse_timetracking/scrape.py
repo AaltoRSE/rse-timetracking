@@ -84,12 +84,11 @@ def scrape():
         # active, this will be switched to True
         active = False
 
-        # Create a list of KPIs. Each will also be counted per person,
-        # so there are two layers of dicts
-        KPIs = defaultdict(lambda: defaultdict(int))
-
         # track time spent here
         time_spent = defaultdict(int)
+
+        # Each KPI is counted per person, so there are two layers of dicts
+        KPIs = defaultdict(lambda: defaultdict(int))
 
         # Track whether the issue was closed
         is_closed = False
@@ -99,27 +98,23 @@ def scrape():
             if not note.created_at.startswith(str(args.year)):
                 continue
 
-            # Check the note for time spent
-            time_spent_parts = parse_time_spent(note.body)
-            if time_spent_parts is not None:
-                t = time_to_seconds(*time_spent_parts)
-                time_spent[note.author['name']] += t
+            # Parse the note
+            author = note.author['name']
+            note_data = scrape_note_body(note.body)
 
-                # if time spent is nozero, the issue is active
-                if t != 0:
+            if 'time_spent' in note_data:
+                time_spent[author] += note_data['time_spent']
+                # If time spent is nozero, the issue is still active
+                if note_data['time_spent'] != 0:
                     active = True
 
-            # Check KPIs
-            KPI_parts = parse_KPIs(note.body)
-            if KPI_parts is not None:
-                name, value = KPI_parts
-                KPIs[name][note.author['name']] += value
-
+            if 'KPI' in note_data:
+                KPI_name, KPI_value = note_data['KPI']
+                KPIs[KPI_name][author] += KPI_value
                 # Found a note during the given year, so the project was active
-                if t:
-                    active = True
+                active = True
 
-            if note.body == "closed":
+            if 'closed' in note_data:
                 is_closed = True
 
         # Tally up everything
@@ -151,3 +146,23 @@ def scrape():
 
     # Thank you and goodbye!
     print(f'Data was written to: {args.output}')
+
+
+def scrape_note_body(body):
+    """Scrape information from a single note body string."""
+    note_data = dict()
+
+    # Check the note for time spent
+    time_spent_parts = parse_time_spent(body)
+    if time_spent_parts is not None:
+        note_data['time_spent'] = time_to_seconds(*time_spent_parts)
+
+    # Check KPIs
+    KPI_parts = parse_KPIs(body)
+    if KPI_parts is not None:
+        note_data['KPI'] = KPI_parts
+
+    if body == "closed":
+        note_data['closed'] = True
+
+    return note_data
