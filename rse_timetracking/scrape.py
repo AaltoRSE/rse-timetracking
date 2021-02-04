@@ -1,7 +1,3 @@
-"""
-Scrape version.aalto.fi to assemble statistics about RSE projects. For each
-project, Key Performance Indicators (KPIs) are gathered from the issue tracker.
-"""
 from argparse import ArgumentParser
 import sys
 from collections import defaultdict
@@ -14,6 +10,11 @@ from .kpis import KPI_defs, parse_KPIs
 
 
 def scrape():
+    """
+    Scrape version.aalto.fi to assemble statistics about RSE projects. For each
+    project, Key Performance Indicators (KPIs) are gathered from the issue
+    tracker.
+    """
     # Parse command line arguments
     p = ArgumentParser(description=__doc__)
     p.add_argument('year', type=int, help='The year to scrape.')
@@ -79,8 +80,8 @@ def scrape():
 
     # Check all issues in case they were active in the desired year
     for issue in repo.issues.list(all=True):
-        # Note if this project was active in 2020. If any note is active,
-        # this will be switched to True
+        # Note if this project was active in the desired year. If any note is
+        # active, this will be switched to True
         active = False
 
         # Create a list of KPIs. Each will also be counted per person,
@@ -95,29 +96,31 @@ def scrape():
 
         for note in issue.notes.list(all=True):
             # Parse only notes created in the specified year
-            if note.created_at.startswith(str(args.year)):
-                # Check the note for time spent
-                t_string, added_or_subtracted = parse_time_spent(note.body)
-                t = time_to_seconds(t_string, added_or_subtracted)
-                if t is not None:
-                    time_spent[note.author['name']] += t
+            if not note.created_at.startswith(str(args.year)):
+                continue
+
+            # Check the note for time spent
+            time_spent_parts = parse_time_spent(note.body)
+            if time_spent_parts is not None:
+                t = time_to_seconds(*time_spent_parts)
+                time_spent[note.author['name']] += t
 
                 # if time spent is nozero, the issue is active
+                if t != 0:
+                    active = True
+
+            # Check KPIs
+            KPI_parts = parse_KPIs(note.body)
+            if KPI_parts is not None:
+                name, value = KPI_parts
+                KPIs[name][note.author['name']] += value
+
+                # Found a note during the given year, so the project was active
                 if t:
                     active = True
 
-                # Check KPIs
-                KPI, value = parse_KPIs(note.body)
-                if KPI is not None:
-                    KPIs[KPI][note.author['name']] += value
-
-                    # Found a note during the given year, so the project was
-                    # active
-                    if t:
-                        active = True
-
-                if note.body == "closed":
-                    is_closed = True
+            if note.body == "closed":
+                is_closed = True
 
         # Tally up everything
         total_time_spent = sum(time_spent.values())
@@ -135,7 +138,7 @@ def scrape():
             if namespace == "Funding":
                 funding = content
 
-        # Issue number, time spent, time saved
+        # Issue number, time spent, time saved, etc.
         if active:
             data.loc[len(data)] = ([issue.iid, issue.title, total_time_spent] +
                                    KPI_sums + [unit, funding, is_closed])
@@ -148,7 +151,3 @@ def scrape():
 
     # Thank you and goodbye!
     print(f'Data was written to: {args.output}')
-
-
-if __name__ == '__main__':
-    scrape()

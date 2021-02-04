@@ -4,38 +4,41 @@ from .time import time_to_seconds
 
 # List of KPIs and matching patterns.
 KPI_defs = [
-    dict(name="Researcher time saved", type="time",
-         pat=re.compile(r'(T|t)ime saved ((?:\d+[a-z]{1,2} ?)+)')),
-    dict(name="Projects supported", type="int",
-         pat=re.compile(r'(O|o)ngoing projects \?:\d')),
-    dict(name="Publications supported", type="int",
-         pat=re.compile(r'(P|p)ublications \?:\d')),
-    dict(name="Open outputs", type="int",
-         pat=re.compile(r'(O|o)pen outputs \?:\d')),
+    dict(name='Researcher time saved', type='time', tag='time saved'),
+    dict(name='Projects supported', type='int', tag='ongoing projects'),
+    dict(name='Publications supported', type='int', tag='publications'),
+    dict(name='Open outputs', type='int', tag='open outputs'),
 ]
 
 
-def parse_KPIs(content, verbose=False):
+def parse_KPIs(content):
     """Match the note body against all KPIs defined above."""
-    for kpi in KPI_defs:
-        m = kpi['pat'].match(content)
-        if m is None:
-            continue  # Note did not match the regular expression
+    content = content.lower()
 
-        # The capture groups of the regex split the note into useful
-        # components. The second group contains the number we need.
-        _, value_string = m.groups()
+    for kpi in KPI_defs:
+        if not content.startswith(kpi['tag']):
+            continue
+
+        # We found a matching KPI!
+        _, value_string = content.split(kpi['tag'], 1)
+
+        # You can write KPIs as:
+        #     'publications 1'
+        # or
+        #     'publications: 1'
+        if value_string.startswith(':'):
+            _, value_string = value_string.split(':', 1)
 
         # Interpret time string as number of seconds
         if kpi['type'] == 'time':
-            value = time_to_seconds(value_string)
+            value = time_to_seconds(value_string.strip())
         # Interpred the number as integer
         elif kpi['type'] == 'int':
-            value = int(value_string)
+            value = int(value_string.strip())
         else:
             raise TypeError(f'Invalid type for KPI: {kpi["type"]}')
 
         # Return a tuple with the KPI name and the value.
         # Since we return here, a note can only match one KPI.
         return kpi['name'], value
-    return None, None
+    return None
