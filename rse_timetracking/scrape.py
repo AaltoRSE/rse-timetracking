@@ -79,13 +79,13 @@ def scrape():
     #                                 ["Unit", "Funding", "Closed"])
     issue_records = []
 
-    print(f' # Issue title                                                  Total time spent', flush=True) 
+    print(f'    Issue title                                                 Total time spent', flush=True) 
     print(f'--------------------------------------------------------------------------------', flush=True) 
 
     # Check all issues in case they were active in the desired year
     for issue in repo.issues.list(all=True):
         # Note if this project was active in the desired year. If any note is
-        # active, this will be switched to True
+        # acti ve, this will be switched to True
         active = False
 
         # track time spent here
