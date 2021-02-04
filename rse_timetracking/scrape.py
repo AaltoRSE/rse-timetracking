@@ -100,21 +100,24 @@ def scrape():
 
             # Parse the note
             author = note.author['name']
-            note_data = scrape_note_body(note.body)
 
-            if 'time_spent' in note_data:
-                time_spent[author] += note_data['time_spent']
-                # If time spent is nozero, the issue is still active
-                if note_data['time_spent'] != 0:
+            # Check the note for time spent
+            time_spent_parts = parse_time_spent(note.body)
+            if time_spent_parts is not None:
+                t = time_to_seconds(*time_spent_parts)
+                time_spent[author] += t
+                if t != 0:
                     active = True
 
-            if 'KPI' in note_data:
-                KPI_name, KPI_value = note_data['KPI']
+            # Check KPIs
+            KPI_parts = parse_KPIs(note.body)
+            if KPI_parts is not None:
+                KPI_name, KPI_value = KPI_parts
                 KPIs[KPI_name][author] += KPI_value
                 # Found a note during the given year, so the project was active
                 active = True
 
-            if 'closed' in note_data:
+            if note.body == "closed":
                 is_closed = True
 
         # Tally up everything
@@ -146,23 +149,3 @@ def scrape():
 
     # Thank you and goodbye!
     print(f'Data was written to: {args.output}')
-
-
-def scrape_note_body(body):
-    """Scrape information from a single note body string."""
-    note_data = dict()
-
-    # Check the note for time spent
-    time_spent_parts = parse_time_spent(body)
-    if time_spent_parts is not None:
-        note_data['time_spent'] = time_to_seconds(*time_spent_parts)
-
-    # Check KPIs
-    KPI_parts = parse_KPIs(body)
-    if KPI_parts is not None:
-        note_data['KPI'] = KPI_parts
-
-    if body == "closed":
-        note_data['closed'] = True
-
-    return note_data
