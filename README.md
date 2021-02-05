@@ -2,7 +2,7 @@ RSE Time Tracking System
 ========================
 
 The Aalto RSE team tracks their time and Key Performance Indicators (KPIs) in a Gitlab repository.
-This package contains the command line utility `rse_timetracking` to script this repository and write the statistics to a CSV file.
+This package contains the command line utility `rse_timetracking` to scrape this repository, write the statistics to a CSV file and produce a nice HTML report.
 
 
 Installation
