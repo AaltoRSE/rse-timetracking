@@ -2,7 +2,6 @@
 Scrape version.aalto.fi to assemble statistics about RSE projects. For each
 project, Key Performance Indicators (KPIs) are gathered from the issue tracker.
 """
-from argparse import ArgumentParser
 import sys
 from collections import defaultdict
 
@@ -13,22 +12,8 @@ from .time import time_to_seconds, parse_time_spent
 from .kpis import parse_KPIs
 
 
-def scrape():
+def scrape(args):
     """Main function that serves as the entrypoint to rse_timetracking."""
-    # Parse command line arguments
-    p = ArgumentParser(description=__doc__)
-    p.add_argument('year', type=int, help='The year to scrape.')
-    p.add_argument('-o', '--output', nargs='?', type=str, default=None,
-                   help=('The .csv file to write the scraped data to. '
-                         'Defaults to report_<year>.csv'))
-    p.add_argument('--repo', type=str, default='AaltoRSE/rse-projects',
-                   help=('The name of the repository that tracks the '
-                         'projects. Defaults to AaltoRSE/rse-projects'))
-    args = p.parse_args()
-
-    # This default value needs to be computed from other arguments
-    if args.output is None:
-        args.output = f'report_{args.year}.csv'
 
     # Try to connect to gitlab
     gitlab_cfg_msg = """
@@ -71,23 +56,12 @@ def scrape():
     else:
         repo = gl.projects.get(repo[0]['id'])
 
-    # # Create an empty python dataframe and define the columns.
-    # # This will contain the issue numer and name, the amount of RSE time spent,
-    # # all the KPIs defined above and unit and funding information.
-    # data = pd.DataFrame([], columns=["#", "Project", "RSE time spent"] +
-    #                                 [KPI['name'] for KPI in KPI_defs] +
-    #                                 ["Unit", "Funding", "Closed"])
     issue_records = []
 
-    print(f'    Issue title                                                 Total time spent', flush=True) 
-    print(f'--------------------------------------------------------------------------------', flush=True) 
+    print(f'    Issue title                                                 Total time spent', flush=True)  # noqa
+    print(f'--------------------------------------------------------------------------------', flush=True)  # noqa
 
-    # Check all issues in case they were active in the desired year
     for issue in repo.issues.list(all=True):
-        # Note if this project was active in the desired year. If any note is
-        # acti ve, this will be switched to True
-        active = False
-
         # track time spent here
         time_spent = defaultdict(int)
 
@@ -98,10 +72,6 @@ def scrape():
         is_closed = False
 
         for note in issue.notes.list(all=True):
-            # Parse only notes created in the specified year
-            if not note.created_at.startswith(str(args.year)):
-                continue
-
             # Parse the note
             author = note.author['name']
 
@@ -110,24 +80,15 @@ def scrape():
             if time_spent_parts is not None:
                 t = time_to_seconds(*time_spent_parts)
                 time_spent[author] += t
-                if t != 0:
-                    active = True
 
             # Check KPIs
             KPI_parts = parse_KPIs(note.body)
             if KPI_parts is not None:
                 KPI_name, KPI_value = KPI_parts
                 KPIs[KPI_name][author] += KPI_value
-                # Found a note during the given year, so the project was active
-                active = True
 
             if note.body == "closed":
                 is_closed = True
-
-        # # Tally up everything
-        # KPI_sums = []
-        # for KPI in KPI_defs:
-        #     KPI_sums.append(sum(KPIs[KPI['name']].values()))
 
         # Done with notes
         # Now check the labels
@@ -140,27 +101,26 @@ def scrape():
                 funding = content
 
         # Issue number, time spent, time saved, etc.
-        if active:
-            issue_record = dict(
-                iid=issue.iid,
-                project=issue.title,
-                unit=unit,
-                funding=funding,
-                is_closed=is_closed,
-            )
+        issue_record = dict(
+            iid=issue.iid,
+            project=issue.title,
+            unit=unit,
+            funding=funding,
+            is_closed=is_closed,
+        )
 
-            for KPI_name, KPI_values in KPIs.items():
-                for author, KPI_value in KPI_values.items():
-                    issue_record[f'{KPI_name} by {author}'] = KPI_value
+        for KPI_name, KPI_values in KPIs.items():
+            for author, KPI_value in KPI_values.items():
+                issue_record[f'{KPI_name} by {author}'] = KPI_value
 
-            for author, time in time_spent.items():
-                issue_record[f'Time spent by {author}'] = time
+        for author, time in time_spent.items():
+            issue_record[f'Time spent by {author}'] = time
 
-            issue_records.append(issue_record)
+        issue_records.append(issue_record)
 
-            total_time_spent = sum(time_spent.values())
-            print(f'{issue.iid:03d} {issue.title:<68} {total_time_spent:>7d}',
-                  flush=True)
+        total_time_spent = sum(time_spent.values())
+        print(f'{issue.iid:03d} {issue.title:<68} {total_time_spent:>7d}',
+              flush=True)
 
     data = pd.DataFrame(issue_records)
     data.to_csv(args.output, index=False)

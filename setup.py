@@ -19,7 +19,7 @@ setuptools.setup(
         'Operating System :: OS Independent',
     ],
     python_requires='>=3.6',
-    entry_points = dict(
-        console_scripts=['rse_timetracking=rse_timetracking:scrape'],
+    entry_points=dict(
+        console_scripts=['rse_timetracking=rse_timetracking:main.main'],
     )
 )

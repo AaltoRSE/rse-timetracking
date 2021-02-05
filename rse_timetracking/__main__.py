@@ -1,4 +1,4 @@
-from . import scrape
+from .main import main
 
 if __name__ == '__main__':
-    scrape()
+    main()

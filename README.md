@@ -13,13 +13,20 @@ Install with: `python setup.py install`
 
 Usage
 -----
-Use the `rse_timetracking` command to scrape the Gitlab repo. It needs the year to scrape as a command line argument, for example:
+Use the `rse_timetracking` command to scrape the Gitlab repo:
 
 ```bash
-$ rse_timetracking 2021 -o report_2021.csv
+$ rse_timetracking scrape
 ```
 
-See `rse_timetracking --help` for all options.
+This produces a file called `report.csv` (this can be changed with the `-o` option).
+Then, an HTML report can be build with:
+
+```bash
+$ rse_timetracking report
+```
+
+This reads in the `report.csv` file (this can be changed with the `-i` option) and produces a file called `report.html` (this can be changed with the `-o` option).
 
 
 Development
