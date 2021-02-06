@@ -27,6 +27,9 @@ def main():
     p_report.add_argument('-o', '--output', default='report.html',
                           help=('The .html file to write the report to. '
                                 'Defaults to report.html'))
+    p_report.add_argument('-y', '--year', type=int, default=None,
+                          help=('Restrict report to a specific year.'
+                                'Defaults to reporting on all years'))
 
     args = parser.parse_args()
 

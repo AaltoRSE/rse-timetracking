@@ -4,6 +4,7 @@ project, Key Performance Indicators (KPIs) are gathered from the issue tracker.
 """
 import sys
 from collections import defaultdict
+import dateutil
 
 import gitlab
 import pandas as pd
@@ -71,6 +72,8 @@ def scrape(args):
         # Track whether the issue was closed
         is_closed = False
 
+        note_creation_dates = []
+
         for note in issue.notes.list(all=True):
             # Parse the note
             author = note.author['name']
@@ -90,6 +93,16 @@ def scrape(args):
             if note.body == "closed":
                 is_closed = True
 
+            note_creation_dates.append(dateutil.parser.parse(note.created_at))
+
+        # Determine dates during which the issue/project was active
+        if len(note_creation_dates) == 0:
+            date_start = None
+            date_end = None
+        else:
+            date_start = min(note_creation_dates)
+            date_end = max(note_creation_dates)
+
         # Done with notes
         # Now check the labels
         funding = 'Unknown'
@@ -107,6 +120,8 @@ def scrape(args):
             unit=unit,
             funding=funding,
             is_closed=is_closed,
+            date_start=date_start,
+            date_end=date_end,
         )
 
         for KPI_name, KPI_values in KPIs.items():
@@ -115,11 +130,11 @@ def scrape(args):
 
         for author, time in time_spent.items():
             issue_record[f'Time spent by {author}'] = time
+        total_time_spent = sum(time_spent.values())
+        issue_record['Total time spent'] = total_time_spent
 
         issue_records.append(issue_record)
-
-        total_time_spent = sum(time_spent.values())
-        print(f'{issue.iid:03d} {issue.title:<68} {total_time_spent:>7d}',
+        print(f'{issue.iid:03d} {issue.title[:68]:<68} {total_time_spent:>7d}',
               flush=True)
 
     data = pd.DataFrame(issue_records)
