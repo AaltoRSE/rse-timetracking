@@ -19,6 +19,13 @@ setuptools.setup(
         'Operating System :: OS Independent',
     ],
     python_requires='>=3.6',
+    install_requires=[
+        'pandas',
+        'plotly',
+        'python-dateutil',
+        'python-gitlab',
+        'requests',
+        ],
     entry_points=dict(
         console_scripts=['rse_timetracking=rse_timetracking:main.main'],
     )
