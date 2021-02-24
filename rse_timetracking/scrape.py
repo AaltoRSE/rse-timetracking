@@ -72,8 +72,6 @@ def scrape(args):
         # Track whether the issue was closed
         is_closed = False
 
-        note_creation_dates = []
-
         for note in issue.notes.list(all=True):
             # Parse the note
             author = note.author['name']
@@ -84,24 +82,35 @@ def scrape(args):
                 t = time_to_seconds(*time_spent_parts)
                 time_spent[author] += t
 
+            if note.body == "closed":
+                is_closed = True
+            # TODO: switching status to re-opened
+
+            # Issue number, time spent, time saved, etc.
+            issue_record = dict(
+                time=note_creation_dates.append(dateutil.parser.parse(note.created_at)),
+                author=author,
+                time_spent=t,
+                iid=issue.iid,
+                project=issue.title,
+                unit=unit,
+                funding=funding,
+                is_closed=is_closed,
+            )
+
             # Check KPIs
             KPI_parts = parse_KPIs(note.body)
             if KPI_parts is not None:
                 KPI_name, KPI_value = KPI_parts
-                KPIs[KPI_name][author] += KPI_value
+                issue_record[KPI_name] += KPI_value
 
-            if note.body == "closed":
-                is_closed = True
-
-            note_creation_dates.append(dateutil.parser.parse(note.created_at))
-
-        # Determine dates during which the issue/project was active
-        if len(note_creation_dates) == 0:
-            date_start = None
-            date_end = None
-        else:
-            date_start = min(note_creation_dates)
-            date_end = max(note_creation_dates)
+        ## Determine dates during which the issue/project was active
+        #if len(note_creation_dates) == 0:
+        #    date_start = None
+        #    date_end = None
+        #else:
+        #    date_start = min(note_creation_dates)
+        #    date_end = max(note_creation_dates)
 
         # Done with notes
         # Now check the labels
@@ -113,16 +122,6 @@ def scrape(args):
             elif namespace == "Funding":
                 funding = content
 
-        # Issue number, time spent, time saved, etc.
-        issue_record = dict(
-            iid=issue.iid,
-            project=issue.title,
-            unit=unit,
-            funding=funding,
-            is_closed=is_closed,
-            date_start=date_start,
-            date_end=date_end,
-        )
 
         for KPI_name, KPI_values in KPIs.items():
             for author, KPI_value in KPI_values.items():
