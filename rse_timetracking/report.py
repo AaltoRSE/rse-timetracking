@@ -19,13 +19,13 @@ def report(args):
                 if ' by ' in col and not col.startswith('Time spent')])
 
     # Compute time spent per unit
-    time_per_unit = data.groupby('unit')[['Total time spent']].agg('sum')
+    time_per_unit = data.groupby('unit')[['time_spent']].agg('sum')
     time_per_unit = time_per_unit.sort_index()
     time_per_unit = time_per_unit.reset_index()
 
     fig_time_per_unit = px.pie(
         time_per_unit,
-        values='Total time spent',
+        values='time_spent',
         names='unit',
         title='Time spent per unit',
     ).to_html(include_plotlyjs=False, full_html=False, default_width=400,
@@ -33,14 +33,12 @@ def report(args):
 
     # Compute how each RSE spent their time. The percentage of time dedicated
     # to each unit.
-    time_spent_cols = [f'Time spent by {RSE}' for RSE in RSEs]
-    rse_time = data[['unit'] + time_spent_cols].groupby('unit').agg('sum')
-    rse_time /= rse_time.sum()
+    rse_time = data.groupby(['author', 'unit']).agg('sum')['time_spent']
+    rse_time /= rse_time.groupby('author').transform('sum')
     rse_time *= 100
-    rse_time = rse_time.stack().reset_index()
-    rse_time.columns = ['Unit', 'RSE', 'Time spent (%)']
-    rse_time['RSE'] = rse_time['RSE'].str.lstrip('Time spent by ')
-    rse_time = rse_time.sort_values('Unit')
+    rse_time = rse_time.reset_index()
+    rse_time.columns = ['RSE', 'Unit', 'Time spent (%)']
+    rse_time = rse_time.sort_values(['RSE', 'Unit'])
 
     fig_rse_time = px.bar(
         rse_time,

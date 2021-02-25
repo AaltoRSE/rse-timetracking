@@ -59,82 +59,48 @@ def scrape(args):
 
     issue_records = []
 
-    print(f'    Issue title                                                 Total time spent', flush=True)  # noqa
-    print(f'--------------------------------------------------------------------------------', flush=True)  # noqa
-
     for issue in repo.issues.list(all=True):
-        # track time spent here
-        time_spent = defaultdict(int)
-
-        # Each KPI is counted per person, so there are two layers of dicts
-        KPIs = defaultdict(lambda: defaultdict(int))
-
-        # Track whether the issue was closed
-        is_closed = False
+        # Get some data from the labels
+        funding = 'Unknown'
+        for label in issue.labels:
+            try:
+                namespace, content = label.split('::')
+                if namespace == "Unit":
+                    unit = content
+                elif namespace == "Funding":
+                    funding = content
+            except ValueError:
+                # Label doesn't follow namespace::content pattern
+                pass
 
         for note in issue.notes.list(all=True):
-            # Parse the note
-            author = note.author['name']
-
             # Check the note for time spent
             time_spent_parts = parse_time_spent(note.body)
             if time_spent_parts is not None:
-                t = time_to_seconds(*time_spent_parts)
-                time_spent[author] += t
-
-            if note.body == "closed":
-                is_closed = True
-            # TODO: switching status to re-opened
+                time_spent = time_to_seconds(*time_spent_parts)
 
             # Issue number, time spent, time saved, etc.
             issue_record = dict(
-                time=note_creation_dates.append(dateutil.parser.parse(note.created_at)),
-                author=author,
-                time_spent=t,
+                time=dateutil.parser.parse(note.created_at),
+                author=note.author['name'],
+                time_spent=time_spent,
                 iid=issue.iid,
                 project=issue.title,
                 unit=unit,
                 funding=funding,
-                is_closed=is_closed,
+                is_closed=note.body == 'closed',
+                # TODO: switching status to re-opened
             )
 
             # Check KPIs
             KPI_parts = parse_KPIs(note.body)
             if KPI_parts is not None:
                 KPI_name, KPI_value = KPI_parts
-                issue_record[KPI_name] += KPI_value
+                issue_record[KPI_name] = KPI_value
 
-        ## Determine dates during which the issue/project was active
-        #if len(note_creation_dates) == 0:
-        #    date_start = None
-        #    date_end = None
-        #else:
-        #    date_start = min(note_creation_dates)
-        #    date_end = max(note_creation_dates)
+            issue_records.append(issue_record)
 
-        # Done with notes
-        # Now check the labels
-        funding = 'Unknown'
-        for label in issue.labels:
-            namespace, content = label.split('::')
-            if namespace == "Unit":
-                unit = content
-            elif namespace == "Funding":
-                funding = content
-
-
-        for KPI_name, KPI_values in KPIs.items():
-            for author, KPI_value in KPI_values.items():
-                issue_record[f'{KPI_name} by {author}'] = KPI_value
-
-        for author, time in time_spent.items():
-            issue_record[f'Time spent by {author}'] = time
-        total_time_spent = sum(time_spent.values())
-        issue_record['Total time spent'] = total_time_spent
-
-        issue_records.append(issue_record)
-        print(f'{issue.iid:03d} {issue.title[:68]:<68} {total_time_spent:>7d}',
-              flush=True)
+        print(f'{issue.iid:03d} {issue.title[:75]:<75}', flush=True)
 
     data = pd.DataFrame(issue_records)
     data.to_csv(args.output, index=False)
