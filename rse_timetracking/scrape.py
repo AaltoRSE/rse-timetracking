@@ -78,6 +78,8 @@ def scrape(args):
             time_spent_parts = parse_time_spent(note.body)
             if time_spent_parts is not None:
                 time_spent = time_to_seconds(*time_spent_parts)
+            else:
+                time_spent = 0
 
             # Issue number, time spent, time saved, etc.
             issue_record = dict(
