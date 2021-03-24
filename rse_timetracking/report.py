@@ -37,7 +37,7 @@ def report(args):
               default_height=400)
 
     # Compute time spent per unit, per-month
-    time_per_unit_per_month = data.groupby(['unit', pd.Grouper(freq='M')])[['time_spent']].agg('sum')
+    time_per_unit_per_month = data.groupby(['unit', pd.Grouper(freq='M', label='left')])[['time_spent']].agg('sum')
     time_per_unit_per_month = time_per_unit_per_month.sort_index()
     time_per_unit_per_month = time_per_unit_per_month.reset_index()
     time_per_unit_per_month['time_spent'] /= (60 * 60 * 8)  # 8-hour work days
