@@ -24,6 +24,7 @@ setuptools.setup(
         'plotly',
         'python-dateutil',
         'python-gitlab',
+        'pytz',
         'requests',
         ],
     entry_points=dict(

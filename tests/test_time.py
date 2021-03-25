@@ -6,13 +6,13 @@ from rse_timetracking.time import parse_time_spent, time_to_seconds
 def test_parse_time_spent():
     """Test parsing a Gitlab time tracking message body."""
     body = 'added 1s of time spent at 2021-02-04'
-    assert parse_time_spent(body) == ('1s', 'added')
+    assert parse_time_spent(body) == ('1s', 'added', '2021-02-04')
 
     body = 'subtracted 1s of time spent at 2021-02-04'
-    assert parse_time_spent(body) == ('1s', 'subtracted')
+    assert parse_time_spent(body) == ('1s', 'subtracted', '2021-02-04')
 
     body = 'added 1w 2d 3h 1s of time spent at 2021-02-04'
-    assert parse_time_spent(body) == ('1w 2d 3h 1s', 'added')
+    assert parse_time_spent(body) == ('1w 2d 3h 1s', 'added', '2021-02-04')
 
     # Missing pieces
     body = '2d of time spent'

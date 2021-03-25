@@ -5,6 +5,7 @@ project, Key Performance Indicators (KPIs) are gathered from the issue tracker.
 import sys
 from collections import defaultdict
 import dateutil
+import pytz
 
 import gitlab
 import pandas as pd
@@ -12,6 +13,7 @@ import pandas as pd
 from .time import time_to_seconds, parse_time_spent
 from .kpis import parse_KPIs
 
+TZ = pytz.timezone('Europe/Helsinki')
 
 def scrape(args):
     """Main function that serves as the entrypoint to rse_timetracking."""
@@ -74,16 +76,18 @@ def scrape(args):
                 pass
 
         for note in issue.notes.list(all=True):
+            created_at = dateutil.parser.parse(note.created_at)
             # Check the note for time spent
             time_spent_parts = parse_time_spent(note.body)
             if time_spent_parts is not None:
-                time_spent = time_to_seconds(*time_spent_parts)
+                time_spent = time_to_seconds(*time_spent_parts[:2])
+                created_at = TZ.localize(dateutil.parser.parse(time_spent_parts[2]))
             else:
                 time_spent = 0
 
             # Issue number, time spent, time saved, etc.
             issue_record = dict(
-                time=dateutil.parser.parse(note.created_at),
+                time=created_at,
                 author=note.author['name'],
                 time_spent=time_spent,
                 iid=issue.iid,

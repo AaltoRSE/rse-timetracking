@@ -36,7 +36,7 @@ def parse_time_spent(content):
 
     # The capture groups of the regex split the note into useful components
     added_or_subtracted, time_spent_string, date_added = m.groups()
-    return time_spent_string, added_or_subtracted
+    return time_spent_string, added_or_subtracted, date_added
 
 
 def time_to_seconds(time_string, added_or_subtracted='added'):
