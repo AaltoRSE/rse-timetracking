@@ -5,9 +5,13 @@ from .time import time_to_seconds
 # List of KPIs and matching patterns.
 KPI_defs = [
     dict(name='Researcher time saved', type='time', tag='time saved'),
+    dict(name='Researcher time saved', type='time', tag='/timesaved'),
     dict(name='Projects supported', type='int', tag='ongoing projects'),
+    dict(name='Projects supported', type='int', tag='/projects'),
     dict(name='Publications supported', type='int', tag='publications'),
+    dict(name='Publications supported', type='int', tag='/publications'),
     dict(name='Open outputs', type='int', tag='open outputs'),
+    dict(name='Open outputs', type='int', tag='/openoutputs'),
 ]
 
 
