@@ -73,12 +73,12 @@ def report(args):
 
     # Compute time spent vs. time saved 
     # First, only select project that have a value for time saved
-    projects_with_time_saved = data.groupby('iid').agg('sum').query('`Researcher time saved` > 0').index
+    projects_with_time_saved = data.groupby('iid').agg('sum').query('`timesaved` > 0').index
     time_spent_vs_saved = data[data.iid.isin(projects_with_time_saved)]
 
     # Compute the total time spent and saved for each group.
     # Use the last date mentioned in the project as representative date.
-    time_spent_vs_saved = time_spent_vs_saved.reset_index()[['iid', 'time', 'time_spent', 'Researcher time saved']]
+    time_spent_vs_saved = time_spent_vs_saved.reset_index()[['iid', 'time', 'time_spent', 'timesaved']]
     time_spent_vs_saved.columns = ['iid', 'time', 'time spent', 'time saved']
     time_spent_vs_saved_groups = time_spent_vs_saved.groupby('iid')
     time_spent_vs_saved = time_spent_vs_saved_groups.agg({
