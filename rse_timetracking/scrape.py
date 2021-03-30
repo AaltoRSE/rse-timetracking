@@ -75,6 +75,7 @@ def scrape(args):
                 # Label doesn't follow namespace::content pattern
                 pass
 
+        print(f'{issue.iid:03d} {issue.title[:75]:<75}', flush=True)
         for note in issue.notes.list(all=True):
             created_at = dateutil.parser.parse(note.created_at)
             # Check the note for time spent
@@ -99,14 +100,12 @@ def scrape(args):
             )
 
             # Check KPIs
-            KPI_parts = parse_KPIs(note.body)
-            if KPI_parts is not None:
+            for KPI_parts in parse_KPIs(note.body):
                 KPI_name, KPI_value = KPI_parts
                 issue_record[KPI_name] = KPI_value
 
             issue_records.append(issue_record)
 
-        print(f'{issue.iid:03d} {issue.title[:75]:<75}', flush=True)
 
     data = pd.DataFrame(issue_records)
     data.to_csv(args.output, index=False)

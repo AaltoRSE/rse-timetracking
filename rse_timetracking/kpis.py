@@ -4,14 +4,19 @@ from .time import time_to_seconds
 
 # List of KPIs and matching patterns.
 KPI_defs = [
-    dict(name='Researcher time saved', type='time', tag='time saved'),
-    dict(name='Researcher time saved', type='time', tag='/timesaved'),
-    dict(name='Projects supported', type='int', tag='ongoing projects'),
-    dict(name='Projects supported', type='int', tag='/projects'),
-    dict(name='Publications supported', type='int', tag='publications'),
-    dict(name='Publications supported', type='int', tag='/publications'),
-    dict(name='Open outputs', type='int', tag='open outputs'),
-    dict(name='Open outputs', type='int', tag='/openoutputs'),
+    dict(name='timesaved', type='time', tag='/timesaved'),
+    dict(name='projects', type='int', tag='/projects'),
+    dict(name='publications', type='int', tag='/publications'),
+    dict(name='software', type='int', tag='/software'),
+    dict(name='datasets', type='int', tag='/datasets'),
+    dict(name='outputs', type='int', tag='/outputs'),
+
+    # Deprecated, to be removed
+    dict(name='publications', type='int', tag='publications'),
+    dict(name='timesaved', type='time', tag='time saved'),
+    dict(name='projects', type='int', tag='ongoing projects'),
+    dict(name='outputs', type='int', tag='open outputs'),
+    dict(name='outputs', type='int', tag='/openoutputs'),
 ]
 
 
@@ -19,12 +24,14 @@ def parse_KPIs(content):
     """Match the note body against all KPIs defined above."""
     content = content.lower()
 
-    for kpi in KPI_defs:
-        if not content.startswith(kpi['tag']):
+    for line in content.split('\n'):
+
+      for kpi in KPI_defs:
+        if not line.startswith(kpi['tag']):
             continue
 
         # We found a matching KPI!
-        _, value_string = content.split(kpi['tag'], 1)
+        _, value_string = line.split(kpi['tag'], 1)
 
         # You can write KPIs as:
         #     'publications 1'
@@ -44,5 +51,4 @@ def parse_KPIs(content):
 
         # Return a tuple with the KPI name and the value.
         # Since we return here, a note can only match one KPI.
-        return kpi['name'], value
-    return None
+        yield kpi['name'], value
