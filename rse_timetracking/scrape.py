@@ -63,17 +63,47 @@ def scrape(args):
 
     for issue in repo.issues.list(all=True):
         # Get some data from the labels
-        funding = 'Unknown'
+        unit = []
+        funding = []
+        status = []
         for label in issue.labels:
             try:
                 namespace, content = label.split('::')
                 if namespace == "Unit":
-                    unit = content
+                    unit.append(content)
                 elif namespace == "Funding":
-                    funding = content
+                    funding.append(content)
+                elif namespace == "Status":
+                    status.append(content)
             except ValueError:
                 # Label doesn't follow namespace::content pattern
                 pass
+        # There should be only one of these, but this isn't enforced.
+        # But in case there is more than one, pass all through so that
+        # errors don't pass silently.
+        unit = '-'.join(unit)
+        funding = '-'.join(funding)
+        status = '-'.join(status)
+        if funding == '':
+            funding = 'Unknown'
+
+        #import IPython ; IPython.embed()
+        issue_record = dict(
+            iid=issue.iid,
+            project=issue.title,
+            unit=unit,
+            funding=funding,
+            state=issue.state,
+            status=status,
+            # above common for all rows, bottom specific
+            time_created=dateutil.parser.parse(issue.created_at),
+            time=dateutil.parser.parse(issue.created_at),
+            assignee=",".join(x['username'] for x in issue.assignees),
+            time_estimate=issue.time_stats()['time_estimate'],
+            total_time_spent=issue.time_stats()['total_time_spent'],
+        )
+        issue_records.append(issue_record)
+
 
         print(f'{issue.iid:03d} {issue.title[:75]:<75}', flush=True)
         for note in issue.notes.list(all=True):
@@ -88,13 +118,16 @@ def scrape(args):
 
             # Issue number, time spent, time saved, etc.
             issue_record = dict(
-                time=created_at,
-                author=note.author['name'],
-                time_spent=time_spent,
                 iid=issue.iid,
                 project=issue.title,
                 unit=unit,
                 funding=funding,
+                state=issue.state,
+                status=status,
+                # above common for all rows, bottom specific
+                time=created_at,
+                author=note.author['name'],
+                time_spent=time_spent,
                 is_closed=note.body == 'closed',
                 # TODO: switching status to re-opened
             )
