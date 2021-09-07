@@ -15,7 +15,7 @@ def main():
     p_scrape.add_argument('-o', '--output', default='report.csv',
                           help=('The .csv file to write the scraped data to. '
                                 'Defaults to report.csv'))
-    p_scrape.add_argument('--repo', default='AaltoRSE/rse-projects',
+    p_scrape.add_argument('--repo', default='rse-projects',
                           help=('The name of the repository that tracks the '
                                 'projects. Defaults to AaltoRSE/rse-projects'))
 
