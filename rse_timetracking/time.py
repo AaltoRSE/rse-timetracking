@@ -53,7 +53,7 @@ def time_to_seconds(time_string, added_or_subtracted='added'):
                 time_spent += int(unit[:-len(postfix)]) * multiplier
                 break
         else:  # No postfix matched
-            raise RuntimeError(f'Could not parse {unit}')
+            raise RuntimeError(f'Could not parse "{unit}" in time string "{time_string}" (valid units are {' '.join(sorted(postfixes.keys()))})')
 
     if added_or_subtracted == 'subtracted':
         time_spent = -time_spent
