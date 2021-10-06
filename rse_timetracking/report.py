@@ -5,7 +5,7 @@ import plotly.express as px
 
 
 def report(args):
-    data = pd.read_csv(args.input, index_col=0)
+    data = pd.read_csv(args.input)
 
     # Parse the timestamps, which includes timezone information. To make sure
     # all times are in the same timezone, we first convert everything to UTC
