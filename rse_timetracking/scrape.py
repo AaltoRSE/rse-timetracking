@@ -15,6 +15,7 @@ from .kpis import parse_KPIs
 
 TZ = pytz.timezone('Europe/Helsinki')
 
+
 def scrape(args):
     """Main function that serves as the entrypoint to rse_timetracking."""
 
