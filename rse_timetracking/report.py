@@ -11,11 +11,12 @@ def report(args):
     # all times are in the same timezone, we first convert everything to UTC
     # and then to Finnish time (EET).
     data.index = pd.to_datetime(data.index, utc=True).tz_convert('EET')
+    data.time = pd.to_datetime(data.time, utc=True).tz_convert('EET')
 
     # Filter data by date
     if args.year is not None:
-        date_mask = data['date_start'].map(lambda date: date.year) <= args.year
-        date_mask &= data['date_end'].map(lambda date: date.year) >= args.year
+        date_mask = data['time'].map(lambda date: date.year) <= args.year
+        date_mask &= data['time'].map(lambda date: date.year) >= args.year
         data = data[date_mask]
 
     RSEs = set([col.split(' by ')[1] for col in data.columns
