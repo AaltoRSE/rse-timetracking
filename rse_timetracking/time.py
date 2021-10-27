@@ -2,7 +2,7 @@ import re
 
 # Regular expression matching lines such as:
 # added 1h 13m 48s of time spent at 2020-11-04
-time_spent_pattern = re.compile(r'^(added|subtracted) ((?:\d+[a-z]{1,2} ?)+) of time spent at (\d{4}-\d{2}-\d{2})$')  # noqa
+time_spent_pattern = re.compile(r'^(added|subtracted) ((?:\d+[a-z]{1,2} ?)+) of time spent(?: at (\d{4}-\d{2}-\d{2}))?$')  # noqa
 
 # Time can we denoted as "1mo 2d 6h" and so forth. Each postfix means a certain
 # number of seconds.

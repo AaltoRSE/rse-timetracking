@@ -113,7 +113,8 @@ def scrape(args):
             time_spent_parts = parse_time_spent(note.body)
             if time_spent_parts is not None:
                 time_spent = time_to_seconds(*time_spent_parts[:2])
-                created_at = TZ.localize(dateutil.parser.parse(time_spent_parts[2]))
+                if time_spent_parts[2]:
+                    created_at = TZ.localize(dateutil.parser.parse(time_spent_parts[2]))
             else:
                 time_spent = 0
 
