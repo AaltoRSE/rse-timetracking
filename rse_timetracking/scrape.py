@@ -107,8 +107,16 @@ def scrape(args):
 
 
         print(f'{issue.iid:03d} {issue.title[:75]:<75}', flush=True)
-        for note in issue.notes.list(all=True):
+        for note in sorted(issue.notes.list(all=True), key=lambda x: x.created_at):
             created_at = dateutil.parser.parse(note.created_at)
+            # The "removed time spent" removes ALL past time spent on the
+            # issue, but those notes stay there including the time spent.  So
+            # we have to go edit all of the past issues and mark them as
+            # time_spent=0.
+            if note.body == 'removed time spent':
+                for old_row in issue_records:
+                    if old_row['iid'] == issue.iid:
+                        old_row['time_spent'] = 0
             # Check the note for time spent
             time_spent_parts = parse_time_spent(note.body)
             if time_spent_parts is not None:
