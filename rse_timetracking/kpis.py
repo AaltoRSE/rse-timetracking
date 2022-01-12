@@ -2,6 +2,8 @@ import re
 
 from .time import time_to_seconds
 
+LIST_SPLIT = re.compile(', *')
+
 # List of KPIs and matching patterns.
 KPI_defs = [
     dict(name='timesaved', type='time', tag='/timesaved'),
@@ -19,19 +21,31 @@ KPI_defs = [
     dict(name='outputs', type='int', tag='/openoutputs'),
 ]
 
+Metadata_defs = [
+    dict(name='contact', type='list', tag=re.compile('/contacts?')),
+    dict(name='supervisor', type='list', tag=re.compile('/supervisors?')),
+    dict(name='summary', type='str', tag='/summary'),
+    ]
 
-def parse_KPIs(content):
+
+def parse_KPIs(content, defs=KPI_defs):
     """Match the note body against all KPIs defined above."""
     content = content.lower()
 
     for line in content.split('\n'):
 
-      for kpi in KPI_defs:
-        if not line.startswith(kpi['tag']):
-            continue
+      for kpi in defs:
+        if isinstance(kpi['tag'], re.Pattern):
+            m = kpi['tag'].match(line)
+            if not m:
+                continue
+            _, value_string = kpi['tag'].split(line, maxsplit=1)
+        else:
+            if not line.startswith(kpi['tag']):
+                continue
 
-        # We found a matching KPI!
-        _, value_string = line.split(kpi['tag'], 1)
+            # We found a matching KPI!
+            _, value_string = line.split(kpi['tag'], 1)
 
         # You can write KPIs as:
         #     'publications 1'
@@ -46,9 +60,20 @@ def parse_KPIs(content):
         # Interpred the number as integer
         elif kpi['type'] == 'int':
             value = int(value_string.strip())
+        # string
+        elif kpi['type'] == 'str':
+            value = value_string.strip()
+        # list
+        elif kpi['type'] == 'list':
+            values = LIST_SPLIT.split(value_string)
+            for value in values:
+                #print(kpi['name'], value.strip())
+                yield kpi['name'], value.strip()
+            continue
+
         else:
             raise TypeError(f'Invalid type for KPI: {kpi["type"]}')
 
         # Return a tuple with the KPI name and the value.
-        # Since we return here, a note can only match one KPI.
+        #print(kpi['name'], value)
         yield kpi['name'], value

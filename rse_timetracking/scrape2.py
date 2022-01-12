@@ -9,11 +9,11 @@ import dateutil
 import itertools
 import pytz
 
-import dill
+import pickle
 import gitlab
 
 from .time import time_to_seconds, parse_time_spent
-from .kpis import parse_KPIs
+from . import kpis
 from .objects import Project
 
 TZ = pytz.timezone('Europe/Helsinki')
@@ -117,15 +117,23 @@ def scrape2(args):
                     )
 
             # Check KPIs
-            for KPI_parts in parse_KPIs(note.body):
+            for KPI_parts in kpis.parse_KPIs(note.body):
                 KPI_name, KPI_value = KPI_parts
                 p.kpi_list.append(
                     (KPI_name, KPI_value, created_at)
                     )
+
+            # Check metadata
+            for KPI_parts in kpis.parse_KPIs(note.body, defs=kpis.Metadata_defs):
+                KPI_name, KPI_value = KPI_parts
+                p.metadata_list.append(
+                    (KPI_name, KPI_value, created_at)
+                    )
+
         projects.append(p)
 
 
-    open(args.output, 'wb').write(dill.dumps(projects))
+    open(args.output, 'wb').write(pickle.dumps(projects))
 
     # Thank you and goodbye!
     print(f'\nData was written to: {args.output}')
@@ -135,7 +143,7 @@ def load(input):
     return _load(open(input, 'rb').read())
 
 def _load(data):
-    projects = dill.loads(data)
+    projects = pickle.loads(data)
     return projects
 
 import pandas as pd
@@ -168,15 +176,25 @@ def dataframes(projects):
         columns=['iid', 'task'],
         )
 
+    # KPIs
     kpi_list = list(itertools.chain(
                           *([(p.iid,)+kpi for kpi in p.kpi_list]
                             for p in projects)))
-    #print(task_list)
     df_kpis = pd.DataFrame(
         kpi_list,
         columns=['iid', 'kpi_name', 'kpi_value', 'time_kpi'],
         )
     df_kpis['time_kpi'] = pd.to_datetime(df_kpis['time_kpi'], utc=True).dt.tz_convert(TZ)
+
+    # Metadata
+    metadata_list = list(itertools.chain(
+                          *([(p.iid,)+kpi for kpi in p.metadata_list]
+                            for p in projects)))
+    df_metadata = pd.DataFrame(
+        metadata_list,
+        columns=['iid', 'metadata_name', 'metadata_value', 'time_metadata'],
+        )
+    df_metadata['time_metadata'] = pd.to_datetime(df_metadata['time_metadata'], utc=True).dt.tz_convert(TZ)
 
 
 
@@ -184,4 +202,5 @@ def dataframes(projects):
             'df_timespent': df_timespent,
             'df_tasks': df_tasks,
             'df_kpis': df_kpis,
-                }
+            'df_metadata': df_metadata,
+            }

@@ -125,6 +125,7 @@ def scrape(args):
                     created_at = TZ.localize(dateutil.parser.parse(time_spent_parts[2]))
             else:
                 time_spent = 0
+                #print(note.body)
 
             # Issue number, time spent, time saved, etc.
             issue_record = dict(

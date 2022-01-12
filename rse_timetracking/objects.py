@@ -17,6 +17,7 @@ class Project():
         self.timespent = 0
         self.time_spent_list = [ ]
         self.kpi_list = [ ]
+        self.metadata_list = [ ]
 
     @property
     def unit(self):     return '+'.join(self.unit_list)
