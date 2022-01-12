@@ -2,6 +2,7 @@ from argparse import ArgumentParser
 import sys
 
 from .scrape import scrape
+from .scrape2 import scrape2
 from .report import report
 
 
@@ -18,6 +19,8 @@ def main():
     p_scrape.add_argument('--repo', default='rse-projects',
                           help=('The name of the repository that tracks the '
                                 'projects. Defaults to AaltoRSE/rse-projects'))
+    p_scrape.add_argument('--v2', action='store_true',
+                          help=('Use new version'))
 
     # Report sub-command
     p_report = sub_parsers.add_parser('report', help='Build HTML report')
@@ -34,7 +37,10 @@ def main():
     args = parser.parse_args()
 
     if args.command == 'scrape':
-        scrape(args)
+        if args.v2:
+            scrape2(args)
+        else:
+            scrape(args)
     elif args.command == 'report':
         report(args)
     else:
