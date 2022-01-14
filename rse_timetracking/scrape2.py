@@ -19,6 +19,23 @@ from .objects import Project
 TZ = pytz.timezone('Europe/Helsinki')
 
 
+def parse_body(p, body, created_at=None):
+    # Check KPIs
+    for KPI_parts in kpis.parse_KPIs(body):
+        KPI_name, KPI_value = KPI_parts
+        p.kpi_list.append(
+            (KPI_name, KPI_value, created_at)
+            )
+
+    # Check metadata
+    for KPI_parts in kpis.parse_KPIs(body, defs=kpis.Metadata_defs):
+        KPI_name, KPI_value = KPI_parts
+        p.metadata_list.append(
+            (KPI_name, KPI_value, created_at)
+            )
+
+
+
 def scrape2(args):
     """Main function that serves as the entrypoint to rse_timetracking."""
 
@@ -72,6 +89,7 @@ def scrape2(args):
         p.title = issue.title
         p.state = issue.state
         p.time_created = dateutil.parser.parse(issue.created_at)
+        p.time_updated = dateutil.parser.parse(issue.updated_at)
         p.timeestimate = timedelta(seconds=issue.time_stats()['time_estimate'])
         p.timespent = timedelta(seconds=issue.time_stats()['total_time_spent'])
         p.assignee = ",".join(x['username'] for x in issue.assignees)
@@ -97,6 +115,8 @@ def scrape2(args):
                     continue
             p.label_list.append(label)
 
+        parse_body(p, issue.description)
+
         for note in sorted(issue.notes.list(all=True), key=lambda x: x.created_at):
             created_at = dateutil.parser.parse(note.created_at)
             # The "removed time spent" removes ALL past time spent on the
@@ -116,19 +136,8 @@ def scrape2(args):
                     (p.iid, created_at, note.author['name'], timedelta(seconds=time_spent))
                     )
 
-            # Check KPIs
-            for KPI_parts in kpis.parse_KPIs(note.body):
-                KPI_name, KPI_value = KPI_parts
-                p.kpi_list.append(
-                    (KPI_name, KPI_value, created_at)
-                    )
+            parse_body(p, note.body, created_at=created_at)
 
-            # Check metadata
-            for KPI_parts in kpis.parse_KPIs(note.body, defs=kpis.Metadata_defs):
-                KPI_name, KPI_value = KPI_parts
-                p.metadata_list.append(
-                    (KPI_name, KPI_value, created_at)
-                    )
 
         projects.append(p)
 
