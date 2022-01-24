@@ -30,7 +30,6 @@ Metadata_defs = [
 
 def parse_KPIs(content, defs=KPI_defs):
     """Match the note body against all KPIs defined above."""
-    content = content.lower()
 
     for line in content.split('\n'):
 

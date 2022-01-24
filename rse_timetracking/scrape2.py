@@ -90,6 +90,7 @@ def scrape2(args):
         p.state = issue.state
         p.time_created = dateutil.parser.parse(issue.created_at)
         p.time_updated = dateutil.parser.parse(issue.updated_at)
+        p.time_due     = dateutil.parser.parse(issue.due_date) if issue.due_date else None
         p.timeestimate = timedelta(seconds=issue.time_stats()['time_estimate'])
         p.timespent = timedelta(seconds=issue.time_stats()['total_time_spent'])
         p.assignee = ",".join(x['username'] for x in issue.assignees)
@@ -157,7 +158,10 @@ def _load(data):
 
 import pandas as pd
 def dataframes(projects):
-    columns = ['iid', 'title', 'state', 'time_created', 'timeestimate', 'timespent', 'assignee', 'unit', 'funding', 'status']
+    columns = ['iid', 'title', 'state', 'assignee', 'unit', 'funding', 'status',
+               'time_created', 'time_due', 'time_updated',
+               'timeestimate', 'timespent',
+               ]
     df_projects = pd.DataFrame(
         [[getattr(p, name) for name in columns]
              for p in projects],
@@ -205,6 +209,15 @@ def dataframes(projects):
         )
     df_metadata['time_metadata'] = pd.to_datetime(df_metadata['time_metadata'], utc=True).dt.tz_convert(TZ)
 
+    # Other labels
+    label_list = list(itertools.chain(
+                      *([(p.iid, label) for label in p.label_list]
+                        for p in projects)))
+    df_labels = pd.DataFrame(
+        label_list,
+        columns=['iid', 'label_name'],
+        )
+
 
 
     return {'df_projects': df_projects,
@@ -212,4 +225,36 @@ def dataframes(projects):
             'df_tasks': df_tasks,
             'df_kpis': df_kpis,
             'df_metadata': df_metadata,
+            'df_labels': df_labels,
             }
+
+
+def combine_dataframes(df_projects, df_metadata=None, df_labels=None, df_kpis=None, df_tasks=None):
+    """Combine many dataframes into a wide dataframe (format subject to change)
+    """
+    if df_metadata is not None:
+        _ = df_metadata.pivot_table(index='iid', aggfunc=','.join, columns='metadata_name', values='metadata_value')
+        df_projects = df_projects.join(_, how='left', on='iid')
+
+    if df_labels is not None:
+        df_labels = df_labels.copy()
+        df_labels['true'] = True
+        _ = df_labels.pivot(index='iid', columns='label_name', values='true')
+        df_projects = df_projects.join(_, how='left', on='iid')
+
+    if df_kpis is not None:
+        _ = df_kpis.pivot_table(index='iid', columns='kpi_name', values='kpi_value', aggfunc='sum')
+        _['timesaved'] = pd.to_timedelta(_.timesaved, unit='s')
+        df_projects = df_projects.join(_, how='left', on='iid')
+
+    if df_tasks is not None:
+        # one-by-one
+        _ = df_tasks.copy()
+        _['true'] = True
+        _ = _.pivot(index='iid', columns='task', values='true')
+        df_projects = df_projects.join(_, how='left', on='iid')
+        # all combined
+        _ = df_tasks.pivot_table(index='iid', values='task', aggfunc=','.join)
+        df_projects = df_projects.join(_, how='left', on='iid')
+
+    return df_projects
