@@ -39,6 +39,9 @@ def report(args):
 
     # Compute time spent per unit, per-month
     time_per_unit_per_month = data.groupby(['unit', pd.Grouper(freq='M', label='left')])[['time_spent']].agg('sum')
+    print(time_per_unit_per_month)
+    print(time_per_unit_per_month.columns)
+    print(time_per_unit_per_month['time_spent'])
     time_per_unit_per_month = time_per_unit_per_month.sort_index()
     time_per_unit_per_month = time_per_unit_per_month.reset_index()
     time_per_unit_per_month['time_spent'] /= (60 * 60 * 8)  # 8-hour work days
@@ -72,7 +75,7 @@ def report(args):
     ).to_html(include_plotlyjs=False, full_html=False, default_width=600,
               default_height=400)
 
-    # Compute time spent vs. time saved 
+    # Compute time spent vs. time saved
     # First, only select project that have a value for time saved
     projects_with_time_saved = data.groupby('iid').agg('sum').query('`timesaved` > 0').index
     time_spent_vs_saved = data[data.iid.isin(projects_with_time_saved)]
@@ -109,7 +112,7 @@ def report(args):
     <html>
     <head>
       <meta charset="utf-8" />
-      <script src="https://cdn.plot.ly/plotly-latest.min.js"></script> 
+      <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
     </head>
     <body>
       <h1>RSE statistics</h1>
