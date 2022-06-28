@@ -86,7 +86,7 @@ def halli(args):
                         created_at = TZ.localize(dateutil.parser.parse(time_spent_parts[2]))
                     if created_at.year == year and created_at.month == month:
                         time_spent = time_to_seconds(*time_spent_parts[:2])/3600
-                        days[created_at.day][funding] += time_spent
+                        days[created_at.day-1][funding] += time_spent
 
     # For formatting: find funding types with non-zero time spent
     nonzero_types = []
