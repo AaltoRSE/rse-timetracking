@@ -106,22 +106,3 @@ def halli(args):
                 unallocated_time -= time
                 print(f"{type}={time} ", end="")
         print(f"Base={unallocated_time}")
-
-
-if __name__ == '__main__':
-    import argparse, sys
-
-    parser=argparse.ArgumentParser()
-
-    parser.add_argument('-m', '--month', help='The month as an integer')
-    parser.add_argument('-y', '--year', help='The year as an integer')
-    parser.add_argument('-n', '--name', help='Your name')
-    parser.add_argument('-i', '--input', help='Input file name',
-                        default='report.csv')
-    parser.add_argument('--repo', default='rse-projects',
-                          help=('The name of the repository that tracks the '
-                                'projects. Defaults to AaltoRSE/rse-projects'))
-
-    args=parser.parse_args()
-
-    halli(args)
