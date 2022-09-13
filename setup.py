@@ -30,6 +30,6 @@ setuptools.setup(
         'requests',
         ],
     entry_points=dict(
-        console_scripts=['rse_timetracking=rse_timetracking:main.main'],
+        console_scripts=['rse-timetracking=rse_timetracking:main.main'],
     )
 )
