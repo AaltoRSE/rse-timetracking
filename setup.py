@@ -7,11 +7,11 @@ setuptools.setup(
     name='rse-timetracking',
     version='0.1',
     author='Marijn van Vliet and Jarno Rantaharju',
-    author_email='rse@aalto.fi',
+    #author_email='',
     description='A scraper for our RSE projects on Gitlab',
     long_description=long_description,
     long_description_content_type='text/markdown',
-    url='https://version.aalto.fi/gitlab/AaltoRSE/rse-timetracking',
+    url='https://github.com/AaltoRSE/rse-timetracking',
     packages=setuptools.find_packages(),
     classifiers=[
         'Programming Language :: Python :: 3',
