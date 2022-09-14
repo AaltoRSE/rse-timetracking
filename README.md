@@ -45,12 +45,23 @@ supported.
 ### Commands
 
 The following Gitlab commands are natively processed by GitLab:
+
 * Use these within the issue as a comment, to control the time
   allocation.
-* `/estimate TIME-RECORD` - estimate total time a project make take.  Used as
-  soon as possible at beginning of a project, can always be updated
-* `/spend TIME-RECORD [YYYY-MM-DD]` - **announce that you have spent a certain amount of time
-  on the project**
+
+* `/estimate TIME-RECORD [YYYY-MM-DD]` - estimate total time a project
+  make take.  Used as soon as possible at beginning of a project, can
+  always be updated
+
+* `/spend TIME-RECORD [YYYY-MM-DD]` - **announce that you have spent a
+  certain amount of time on the project**
+
+* `TIME-RECORD` has the form `XXmoYYwZZdUUhVVm` for `XX` month, `YY`
+  weeks `ZZ` days `UU` hours and `VV` minutes.
+* Time units: Months (`mo`), Weeks (`w`), Days (`d`), Hours (`h`),
+  Minutes (`m`). Default conversion rates are 1mo = 4w, 1w = 5d, and
+  1d = 8h.
+
 
 The following commands are *not* GitLab commands, but are entered as
 only text comments.  a separate script downloads the text and
