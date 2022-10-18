@@ -1,3 +1,4 @@
+import math
 import re
 
 # Regular expression matching lines such as:
@@ -60,3 +61,32 @@ def time_to_seconds(time_string, added_or_subtracted='added'):
         time_spent = -time_spent
 
     return time_spent
+
+
+def human_time(seconds, rounding=None):
+    """Convert a number of seconds to a human time.
+
+    rounding: round to this many seconds before converting.
+
+    The output format is not stable
+    """
+    if seconds is None or math.isnan(seconds):
+        return None
+    if rounding:
+        seconds = int(rounding * round(seconds/rounding))
+    result = [ ]
+    for suffix, period in postfixes.items():
+        if seconds >= period:
+            result.append(f"{seconds//period}{suffix}")
+            seconds = seconds % period
+    return ''.join(result)
+
+def test_human_time():
+    assert human_time(2)  == '2s'
+    assert human_time(62) == '1m2s'
+    assert human_time(3662) == '1h1m2s'
+    assert human_time(1*postfixes['mo'] + 3662) == '1mo1h1m2s'
+    # with rounding
+    assert human_time(3662, rounding=3600) == '1h'
+    assert human_time(3550, rounding=3600) == '1h'
+    assert human_time(1*postfixes['mo'] + 3662, rounding=3600) == '1mo1h'
