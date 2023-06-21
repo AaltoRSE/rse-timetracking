@@ -51,7 +51,7 @@ def time_to_seconds(time_string, added_or_subtracted='added'):
     for unit in time_string.split(' '):
         for postfix, multiplier in postfixes.items():
             if unit.endswith(postfix):
-                time_spent += int(unit[:-len(postfix)]) * multiplier
+                time_spent += float(unit[:-len(postfix)]) * multiplier
                 break
         else:  # No postfix matched
             valid = ' '.join(sorted(postfixes.keys()))
@@ -60,7 +60,7 @@ def time_to_seconds(time_string, added_or_subtracted='added'):
     if added_or_subtracted == 'subtracted':
         time_spent = -time_spent
 
-    return time_spent
+    return int(time_spent)
 
 
 def human_time(seconds, rounding=None):
