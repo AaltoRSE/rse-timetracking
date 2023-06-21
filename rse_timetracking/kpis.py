@@ -55,7 +55,11 @@ def parse_KPIs(content, defs=KPI_defs):
 
         # Interpret time string as number of seconds
         if kpi['type'] == 'time':
-            value = time_to_seconds(value_string.strip())
+            try:
+                value = time_to_seconds(value_string.strip())
+            except ValueError as e:
+                print(e.__dict__)
+                raise ValueError(str(e) + f'at "{line}"')
         # Interpred the number as integer
         elif kpi['type'] == 'int':
             value = int(value_string.strip())
