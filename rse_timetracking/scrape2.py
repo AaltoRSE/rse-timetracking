@@ -158,21 +158,29 @@ def _load(data):
 
 import pandas as pd
 def dataframes(projects):
+    """Convert raw dumped data into all the respective dataframes.
+
+    Returns a dict of many dataframes.
+    """
     columns = ['iid', 'title', 'state', 'assignee', 'unit', 'funding', 'status',
                'time_created', 'time_due', 'time_updated',
                'timeestimate', 'timespent',
                ]
+    # Create the basic df_projects dataframe
     df_projects = pd.DataFrame(
         [[getattr(p, name) for name in columns]
              for p in projects],
         columns=columns,
         )
+
+    # Update types and structure of dataframe
     df_projects['time_created'] = pd.to_datetime(df_projects['time_created'], utc=True).dt.tz_convert(TZ)#'Europe/Helsinki')
     #df_projects['timespent'] = pd.to_timedelta(df_projects['timespent'], unit='s')
     #df_projects['timeestimate'] = pd.to_timedelta(df_projects['timeestimate'], unit='s')
     df_projects.set_index('iid', inplace=True)
     #print(df_projects.info())
 
+    # Timespent separate accounting
     timespent_list = list(itertools.chain(*(p.time_spent_list for p in projects)))
     df_timespent = pd.DataFrame(
         timespent_list,
@@ -180,6 +188,7 @@ def dataframes(projects):
         )
     df_timespent['time_spentat'] = pd.to_datetime(df_timespent['time_spentat'], utc=True).dt.tz_convert(TZ)
 
+    # "Task:" labels
     task_list = list(itertools.chain(
                           *([[p.iid, task] for task in p.task_list]
                             for p in projects)))
@@ -199,7 +208,7 @@ def dataframes(projects):
         )
     df_kpis['time_kpi'] = pd.to_datetime(df_kpis['time_kpi'], utc=True).dt.tz_convert(TZ)
 
-    # Metadata
+    # Metadata (contact, supervisor, summary) - multi-valued
     metadata_list = list(itertools.chain(
                           *([(p.iid,)+kpi for kpi in p.metadata_list]
                             for p in projects)))
