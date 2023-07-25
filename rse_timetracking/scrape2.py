@@ -228,6 +228,12 @@ def dataframes(projects):
         )
 
 
+    df_projects = combine_dataframes(
+        df_projects,
+        df_metadata=df_metadata,
+        df_labels=df_labels,
+        df_kpis=df_kpis,
+        df_tasks=df_tasks)
 
     return {'df_projects': df_projects,
             'df_timespent': df_timespent,
@@ -255,6 +261,7 @@ def combine_dataframes(df_projects, df_metadata=None, df_labels=None, df_kpis=No
         _ = df_kpis.pivot_table(index='iid', columns='kpi_name', values='kpi_value', aggfunc='sum')
         _['timesaved'] = pd.to_timedelta(_.timesaved, unit='s')
         df_projects = df_projects.join(_, how='left', on='iid')
+        df_projects['timesaved_multiplier'] = df_projects['timesaved'] / df_projects['timespent']
 
     if df_tasks is not None:
         # one-by-one
