@@ -13,6 +13,8 @@ class Project():
         self.time_updated = None
         self.time_due = None
         self.unit_list = [ ]
+        self.size_list = [ ]
+        self.importance_list = [ ]
         self.funding_list = [ ]
         self.status_list = [ ]
         self.task_list = [ ]
@@ -23,11 +25,15 @@ class Project():
         self.metadata_list = [ ]
 
     @property
-    def unit(self):     return '+'.join(self.unit_list)
+    def unit(self):     return '+'.join(self.unit_list) or None
     @property
-    def funding(self):  return '+'.join(self.funding_list)
+    def funding(self):  return '+'.join(self.funding_list) or None
     @property
-    def status(self):   return '+'.join(self.status_list)
+    def status(self):   return '+'.join(self.status_list) or None
+    @property
+    def imp(self):      return '+'.join(self.importance_list) or None
+    @property
+    def size(self):     return '+'.join(self.size_list) or None
 
     def __getstate__(self):
         return self.__dict__

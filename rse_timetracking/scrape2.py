@@ -99,20 +99,26 @@ def scrape2(args):
         for label in issue.labels:
             #print(label)
             if '::' in label:
-                namespace, content = label.split('::')
+                namespace, value = label.split('::')
                 if namespace == "Unit":
-                    p.unit_list.append(content)
+                    p.unit_list.append(value)
+                    continue
+                elif namespace == "Size":
+                    p.size_list.append(value)
                     continue
                 elif namespace == "Funding":
-                    p.funding_list.append(content)
+                    p.funding_list.append(value)
                     continue
                 elif namespace == "Status":
-                    p.status_list.append(content)
+                    p.status_list.append(value)
                     continue
             elif ':' in label:
                 key, value = label.split(':')
                 if key == 'Task':
                     p.task_list.append(value)
+                    continue
+                if key == 'Imp':
+                    p.importance_list.append(value)
                     continue
             p.label_list.append(label)
 
@@ -162,7 +168,7 @@ def dataframes(projects):
 
     Returns a dict of many dataframes.
     """
-    columns = ['iid', 'title', 'state', 'assignee', 'unit', 'funding', 'status',
+    columns = ['iid', 'title', 'state', 'assignee', 'unit', 'funding', 'size', 'status', 'imp',
                'time_created', 'time_due', 'time_updated',
                'timeestimate', 'timespent',
                ]
