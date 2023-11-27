@@ -13,7 +13,12 @@ are in Jupyter Notebooks, which are currently not included here (right
 now they are unfortunately tied up with internal data - we need to fix
 this).
 
-This package contains the command line utility `rse_timetracking` with various subcommands.  The general process is first run a `scrape` subcommand to download data and store it in a csv/pickle file, and then other commands will process this into reports.
+This package contains the command line utility `rse_timetracking` with
+various subcommands.  The general process is first run a `scrape`
+subcommand to download data and store it in a csv/pickle file, and
+then other commands will process this into reports. **normal people
+don't need to do this, just use Gitlab and someone else generates the
+reports.**
 
 This project is probably specific to Aalto RSE right now, but we would
 be happy to make it more general (if we can find a way to make it
@@ -21,22 +26,73 @@ general enough).
 
 
 
-## General procedures of tracking time
+## General procedures of tracking time (quickstart)
 
-In general, when a project is started, create a new issue in the
-rse-projects repository (this is a private repo).  This is usually
-done during the "introductory meeting", which rkdarst will usually
-have with each new project.  Use one of the issue templates to help
-guide you through some of the questions you may want to discuss.  Add
-any relevant labels.  Set an initial time estimate with `/estimate`.
+We don't want to waste time with tracking projects too detailed (that
+also means we optimize for the report and not our users), but **this
+data is very useful for reports.** Please do take this seriously
+(enough).
+
+The actual work is done in the **rse-projects** repository (private
+repo under AaltoRSE on Aalto Gitlab.
+
+
+### Project starting
+
+If a project is more than a day, definitely do the below.  If it's
+less than an hour, usually don't.  Otherwise, do it if you think it's
+useful.
+
+Create a new issue using the ``new_project`` template.  This is often
+done during some "introductory meeting" where there is a live chat
+about what is going on.  The issue template will help guide you in the
+discussion with the customers.
+
+Add any relevant labels (at least one funding, size, status, unit).
+Common statuses: `Lead`: there isn't work yet, but someone suggests
+there might be someday.  `Waiting`: The customer isn't ready for us to
+start yet.  `Queued`: Ready to be worked on when someone has time.
+
+Set an initial time estimate with the `/estimate` (it will be really
+inaccurate, that's OK.  think one hour, one day, week, month, etc).
+
+Assign the issue to yourself if you will be the one working on it.  If
+not, leave it un-assigned and we will discuss who can take it during
+the next meeting.
+
+
+### Doing work
+
 Each time you work on the project, record your time using `/spend`.
+Example: `/spend 6h`.
 
-Then, during our next weekly meeting, we will discuss any new projects
-and schedule them among us.
+Update the `Status` as needed.  Common statuses: `InProgress`: being
+worked on.  `Consulting`: I work on it whenever the customer asks, but
+not usually.
+
+Add comments as needed to let others know about what's going on
+(doesn't need to be detailed for most projects).
+
+
+### Finished
 
 When a project is done, have a follow-up meeting and use the
 reportable commands to make a note of what kind of projects were
 supported.
+
+Update the status.  Common statuses: `Review`: waiting for customer to
+review.  `Reporting`: waiting to get the reports before closing.
+`Done`: is done and doesn't need to be looked at anymore.
+`Maintenance`: is done, but we expect to keep maintaining in the
+future.
+
+Close the issue if it's in the `Status::Done` on `Status::Cancelled`
+status.
+
+Report deliverables: Make a comment with `/timesaved TIME-RECORD` to
+record how much time the customer reports saving (this can be done
+incrementally as you ask them how the project is going.)  Also report
+anything else from the deliverables list below (`/projects`, etc.).
 
 
 
@@ -106,7 +162,8 @@ discussion:
 
 ### Labels
 
-There are various labels which we can add:
+There are various labels which we can add.  All labels should have a
+good description in Gitlab, but this is another summary:
 
 Status:
 * `Status::0-Lead` - someone had an idea that this project might be available.  Maybe the final customer hasn't even been talked to yet
@@ -135,7 +192,10 @@ Task:
   `Task:WebDev`.
 
 Unit:
-* From what department are the customers?  Select one, `Unit::NAME`.
+* From what department are the customers?  Select one, `Unit::NAME`.  Some special cases:
+* `Unit::AaltoGeneral` - stuff that helps everyone
+* `Unit::AaltoSciComp` - stuff that helps Science-IT
+* `Unit::RSE` - stuff that helps the RSE service itself
 
 Special use:
 * `a_Discuss` - should be discussed at the next meeting
@@ -146,6 +206,9 @@ Special use:
 ## Installation
 
 Install with: `python setup.py install`
+
+(if you are just using a system that someone else has set up, no need
+to install it yourself).
 
 
 
