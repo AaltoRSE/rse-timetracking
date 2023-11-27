@@ -19,13 +19,13 @@ time_spent_pattern = re.compile(r'^(added|subtracted) ((?:\d+[a-z]{1,2} ?)+) of 
 # Default conversion rates are 1mo = 4w, 1w = 5d and 1d = 8h
 postfixes = dict(
     # NOTE: This postfix is two letters and hence should be matched first!
-    mo=4 * 5 * 8 * 60 * 60,
+    mo=60 * 60 * 8 * 5 * 4,
     # Now the other, one-letter, postfixes:
-    w=5 * 8 * 60 * 60,
-    d=8 * 60 * 60,
-    h=60 * 60,
-    m=60,
-    s=1,
+    w= 60 * 60 * 8 * 5,
+    d= 60 * 60 * 8,
+    h= 60 * 60,
+    m= 60,
+    s= 1,
 )
 
 
