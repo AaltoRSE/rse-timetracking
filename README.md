@@ -64,11 +64,14 @@ the next meeting.
 ### Doing work
 
 Each time you work on the project, record your time using `/spend`.
-Example: `/spend 6h`.
+Example: `/spend 6h`.  What counts as time spent on a project?:
+working for it, meetings about it, planning what to do about it,
+learning things you wouldn't be learning if it wasn't for this
+project.
 
 Update the `Status` as needed.  Common statuses: `InProgress`: being
 worked on.  `Consulting`: I work on it whenever the customer asks, but
-not usually.
+not routinely thinking about it.
 
 Add comments as needed to let others know about what's going on
 (doesn't need to be detailed for most projects).
@@ -89,10 +92,11 @@ future.
 Close the issue if it's in the `Status::Done` on `Status::Cancelled`
 status.
 
-Report deliverables: Make a comment with `/timesaved TIME-RECORD` to
+Report deliverables: **Make a comment with `/timesaved TIME-RECORD` to
 record how much time the customer reports saving (this can be done
-incrementally as you ask them how the project is going.)  Also report
-anything else from the deliverables list below (`/projects`, etc.).
+incrementally as you ask them how the project is going).  This is our
+single most important reportable.** Also report anything else from the
+deliverables list below (`/projects`, etc.).
 
 
 
