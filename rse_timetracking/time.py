@@ -1,9 +1,13 @@
 import math
 import re
 
+import pytest
+
 # Regular expression matching lines such as:
 # added 1h 13m 48s of time spent at 2020-11-04
 time_spent_pattern = re.compile(r'^(added|subtracted) ((?:\d+[a-z]{1,2} ?)+) of time spent(?: at (\d{4}-\d{2}-\d{2}))?$')  # noqa
+
+time_record_pattern = re.compile(r'([0-9.-] *[a-z]{1,2})', re.I)
 
 # Time can we denoted as "1mo 2d 6h" and so forth. Each postfix means a certain
 # number of seconds.
@@ -27,6 +31,7 @@ postfixes = dict(
     m= 60,
     s= 1,
 )
+valid_units = ' '.join(sorted(postfixes.keys()))
 
 
 def parse_time_spent(content):
@@ -48,14 +53,17 @@ def time_to_seconds(time_string, added_or_subtracted='added'):
     time_spent = 0  # In seconds
 
     # Parse each unit (e.g. "24d") into an integer number of seconds
-    for unit in time_string.split(' '):
+    records = time_record_pattern.findall(time_string)
+    if not records:
+        raise RuntimeError(f'Could not parse anything times from "{time_string}"')
+    for unit in records:
         for postfix, multiplier in postfixes.items():
             if unit.endswith(postfix):
                 time_spent += float(unit[:-len(postfix)]) * multiplier
                 break
+
         else:  # No postfix matched
-            valid = ' '.join(sorted(postfixes.keys()))
-            raise RuntimeError(f'Could not parse "{unit}" in time string "{time_string}" (valid units are {valid})')
+            raise RuntimeError(f'Could not parse "{unit}" in time string "{time_string}" (valid units are {valid_units})')
 
     if added_or_subtracted == 'subtracted':
         time_spent = -time_spent
@@ -90,3 +98,21 @@ def test_human_time():
     assert human_time(3662, rounding=3600) == '1h'
     assert human_time(3550, rounding=3600) == '1h'
     assert human_time(1*postfixes['mo'] + 3662, rounding=3600) == '1mo1h'
+
+def test_time_to_seconds():
+    assert time_to_seconds('2s') == 2
+    assert time_to_seconds('2m') == 120
+    assert time_to_seconds('2h') == 7200
+    assert time_to_seconds('2d') == 2 * postfixes['d']
+    assert time_to_seconds('2w') == 2 * postfixes['w']
+    assert time_to_seconds('2mo') == 2 * postfixes['mo']
+
+    assert time_to_seconds('2m2s') == 122
+    assert time_to_seconds('2m 2s') == 122
+    assert time_to_seconds('2m2mo') == 2 * postfixes['mo'] + 120
+    assert time_to_seconds('2mo 2m') == 2 * postfixes['mo'] + 120
+
+    with pytest.raises(RuntimeError, match='Could not parse "2x"'):
+        time_to_seconds('2x')
+    with pytest.raises(RuntimeError, match='Could not parse anything'):
+        time_to_seconds('')
