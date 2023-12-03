@@ -123,9 +123,9 @@ The following Gitlab commands are natively processed by GitLab:
   1d = 8h.
 
 
-The following commands are *not* GitLab commands, but are entered as
-only text comments.  a separate script downloads the text and
-processes them.  Commands must start after a `\n`.
+The following commands are *not* GitLab commands (they can't
+auto-complete), but are entered as regular text and are processed by
+the scripts in this repository.  Commands must start after a `\n`.
 
 The following commands are used for basic metadata, and asked at the
 start of a project:
