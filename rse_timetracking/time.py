@@ -7,7 +7,7 @@ import pytest
 # added 1h 13m 48s of time spent at 2020-11-04
 time_spent_pattern = re.compile(r'^(added|subtracted) ((?:\d+[a-z]{1,2} ?)+) of time spent(?: at (\d{4}-\d{2}-\d{2}))?$')  # noqa
 
-time_record_pattern = re.compile(r'([0-9.-] *[a-z]{1,2})', re.I)
+time_record_pattern = re.compile(r'([0-9.-]+ *[a-z]{1,2})', re.I)
 
 # Time can we denoted as "1mo 2d 6h" and so forth. Each postfix means a certain
 # number of seconds.
@@ -102,13 +102,19 @@ def test_human_time():
 def test_time_to_seconds():
     assert time_to_seconds('2s') == 2
     assert time_to_seconds('2m') == 120
+    assert time_to_seconds('1.5m') == 90
+    assert time_to_seconds('0.5m') == 30
+    assert time_to_seconds('.5m') == 30
     assert time_to_seconds('2h') == 7200
     assert time_to_seconds('2d') == 2 * postfixes['d']
     assert time_to_seconds('2w') == 2 * postfixes['w']
     assert time_to_seconds('2mo') == 2 * postfixes['mo']
+    assert time_to_seconds('2.5mo') == 2.5 * postfixes['mo']
 
     assert time_to_seconds('2m2s') == 122
     assert time_to_seconds('2m 2s') == 122
+    assert time_to_seconds('.5h0.5m') == 1800 + 30
+    assert time_to_seconds('0.5h .5m') == 1800 + 30
     assert time_to_seconds('2m2mo') == 2 * postfixes['mo'] + 120
     assert time_to_seconds('2mo 2m') == 2 * postfixes['mo'] + 120
 
