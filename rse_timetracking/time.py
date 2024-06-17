@@ -1,8 +1,6 @@
 import math
 import re
 
-import pytest
-
 # Regular expression matching lines such as:
 # added 1h 13m 48s of time spent at 2020-11-04
 time_spent_pattern = re.compile(r'^(added|subtracted) ((?:\d+[a-z]{1,2} ?)+) of time spent(?: at (\d{4}-\d{2}-\d{2}))?$')  # noqa
@@ -100,6 +98,8 @@ def test_human_time():
     assert human_time(1*postfixes['mo'] + 3662, rounding=3600) == '1mo1h'
 
 def test_time_to_seconds():
+    import pytest
+
     assert time_to_seconds('2s') == 2
     assert time_to_seconds('2m') == 120
     assert time_to_seconds('1.5m') == 90
