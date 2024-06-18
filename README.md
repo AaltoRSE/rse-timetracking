@@ -183,6 +183,13 @@ Status:
 * `Status::7-Cancelled` - We decided (along with the customer) to not do this project
 * `Status::8-Maintenance` - Project is "done" but the customer will keep coming back to us for support or updates as needed.
 
+Importance (different ways to say what is important):
+* `Imp:1-Strategic`: strategic benefit to the university or RSE team
+* `Imp:1-Urgent`: the customers need it done soon
+* `Imp:1-Paying`: They are funding us, so we need to keep it in our minds.
+* `Imp:2-PayingInFuture`: Might be large enough to pay in future so pay attention now.
+* `Imp:2-Deadline`: has some real deadline we need to consider.
+
 Funding:
 * `Funding::Unit` - Funding from basic RSE service funding, coming from the different member units.
 * `Funding::Project` - The project is paying for this service itself
@@ -195,11 +202,15 @@ Task:
   attached to it.  Examples include `Task:SwDev`, `Task:Workflow`,
   `Task:WebDev`.
 
-Unit:
+Unit (should only have one of these since it has `::`):
 * From what department are the customers?  Select one, `Unit::NAME`.  Some special cases:
 * `Unit::AaltoGeneral` - stuff that helps everyone
 * `Unit::AaltoSciComp` - stuff that helps Science-IT
 * `Unit::RSE` - stuff that helps the RSE service itself
+
+Unit (sub-parts, to indicate major customers within these departments.  ):
+* `UnitPart:FCAI`
+* `UnitPart:HouseOfAI`
 
 Special use:
 * `a_Discuss` - should be discussed at the next meeting
