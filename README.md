@@ -208,9 +208,9 @@ Unit (should only have one of these since it has `::`):
 * `Unit::AaltoSciComp` - stuff that helps Science-IT
 * `Unit::RSE` - stuff that helps the RSE service itself
 
-Unit (sub-parts, to indicate major customers within these departments.  ):
-* `UnitPart:FCAI`
-* `UnitPart:HouseOfAI`
+Customers (major customers that sponsor many projects.  Use in addition to the unit labels):
+* `Customer:FCAI`
+* `Customer:HouseOfAI`
 
 Special use:
 * `a_Discuss` - should be discussed at the next meeting
