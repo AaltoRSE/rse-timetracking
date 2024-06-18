@@ -28,6 +28,7 @@ setuptools.setup(
         'python-gitlab',
         'pytz',
         'requests',
+        'tabulate', # for making markdown tables
         ],
     entry_points=dict(
         console_scripts=['rse-timetracking=rse_timetracking:main.main'],
