@@ -92,7 +92,9 @@ def scrape2(args):
         p.time_updated = dateutil.parser.parse(issue.updated_at)
         p.time_due     = dateutil.parser.parse(issue.due_date) if issue.due_date else None
         p.timeestimate = timedelta(seconds=issue.time_stats()['time_estimate'])
+        p.timeestimate_s = issue.time_stats()['time_estimate']
         p.timespent = timedelta(seconds=issue.time_stats()['total_time_spent'])
+        p.timespent_s = seconds=issue.time_stats()['total_time_spent']
         p.assignee = ",".join(x['username'] for x in issue.assignees)
 
         # Get some data from the labels
@@ -170,7 +172,8 @@ def dataframes(projects):
     """
     columns = ['iid', 'title', 'state', 'assignee', 'unit', 'funding', 'size', 'status', 'imp',
                'time_created', 'time_due', 'time_updated',
-               'timeestimate', 'timespent',
+               #'timeestimate', 'timespent',
+               'timeestimate_s',  'timespent_s',
                ]
     # Create the basic df_projects dataframe
     df_projects = pd.DataFrame(
@@ -180,7 +183,9 @@ def dataframes(projects):
         )
 
     # Update types and structure of dataframe
-    df_projects['time_created'] = pd.to_datetime(df_projects['time_created'], utc=True).dt.tz_convert(TZ)#'Europe/Helsinki')
+    df_projects['time_created'] = pd.to_datetime(df_projects['time_created'], utc=True).dt.tz_convert(TZ)
+    df_projects['time_updated'] = pd.to_datetime(df_projects['time_updated'], utc=True).dt.tz_convert(TZ)
+    df_projects['time_due']     = pd.to_datetime(df_projects['time_due'],     utc=True).dt.tz_convert(TZ)
     #df_projects['timespent'] = pd.to_timedelta(df_projects['timespent'], unit='s')
     #df_projects['timeestimate'] = pd.to_timedelta(df_projects['timeestimate'], unit='s')
     df_projects.set_index('iid', inplace=True)
@@ -193,6 +198,9 @@ def dataframes(projects):
         columns=['iid', 'time_spentat', 'spender', 'timespent'],
         )
     df_timespent['time_spentat'] = pd.to_datetime(df_timespent['time_spentat'], utc=True).dt.tz_convert(TZ)
+    df_timespent['yearmonth'] = df_timespent['time_spentat'].dt.strftime('%Y-%m')
+    df_timespent['timespent_s'] = df_timespent['timespent'].dt.total_seconds()
+    df_timespent.drop(columns=['timespent'], inplace=True)
 
     # "Task:" labels
     task_list = list(itertools.chain(
@@ -265,9 +273,10 @@ def combine_dataframes(df_projects, df_metadata=None, df_labels=None, df_kpis=No
 
     if df_kpis is not None:
         _ = df_kpis.pivot_table(index='iid', columns='kpi_name', values='kpi_value', aggfunc='sum')
-        _['timesaved'] = pd.to_timedelta(_.timesaved, unit='s')
+        _['timesaved_s'] = _.timesaved
+        #_['timesaved'] = pd.to_timedelta(_.timesaved, unit='s')
         df_projects = df_projects.join(_, how='left', on='iid')
-        df_projects['timesaved_multiplier'] = df_projects['timesaved'] / df_projects['timespent']
+        df_projects['timesaved_multiplier'] = df_projects['timesaved_s'] / df_projects['timespent_s']
 
     if df_tasks is not None:
         # one-by-one

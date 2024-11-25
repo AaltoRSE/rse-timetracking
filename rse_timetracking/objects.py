@@ -6,7 +6,9 @@ class Project():
         self.state = None
         self.title = None
         self.timeestimate = None
+        self.timeestimate_s = None
         self.timespent = None
+        self.timespent_s = None
         self.timespent_list = [ ]
         self.assignee = None
         self.time_created = None
