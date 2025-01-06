@@ -201,6 +201,18 @@ def dataframes(projects):
     df_timespent['yearmonth'] = df_timespent['time_spentat'].dt.strftime('%Y-%m')
     df_timespent['timespent_s'] = df_timespent['timespent'].dt.total_seconds()
     df_timespent.drop(columns=['timespent'], inplace=True)
+    # Infer duration from last match of:
+    # - 'Size:' Label
+    # - Timeestimate (if greater than zero)
+    # - Time spent (if larger than any previous)
+    def map_project_size(size):
+        sizemap = {'0-G': 1*3600, '1-S': 2*8*3600, '2-M': 10*8*3600, '3-L': 40*8*3600, 'x-NA': 0, None: 0}
+        return sizemap[size]
+    df_projects['duration_inferred_s'] = df_projects['size'].apply(map_project_size)
+    df_projects['size_d'] = df_projects['size'].apply(map_project_size) / (8*3600)
+    df_projects.loc[df_projects['timeestimate_s']>0,                               'duration_inferred_s'] = df_projects['timeestimate_s']
+    df_projects.loc[df_projects['timespent_s']>df_projects['duration_inferred_s'], 'duration_inferred_s'] = df_projects['timespent_s']
+    df_projects['duration_inferred_d'] = df_projects['duration_inferred_s'] / (8*3600)
 
     # "Task:" labels
     task_list = list(itertools.chain(
