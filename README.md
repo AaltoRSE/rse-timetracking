@@ -109,12 +109,13 @@ The following Gitlab commands are natively processed by GitLab:
 * Use these within the issue as a comment, to control the time
   allocation.
 
-* `/estimate TIME-RECORD [YYYY-MM-DD]` - estimate total time a project
-  make take.  Used as soon as possible at beginning of a project, can
-  always be updated
+* `/estimate TIME-RECORD [YYYY-MM-DD]` - **total time a projects takes
+  (an estimate at the beginning, updated to something more precise
+  during+after a project).** Used as soon as possible at beginning of
+  a project, can always be updated.
 
-* `/spend TIME-RECORD [YYYY-MM-DD]` - **announce that you have spent a
-  certain amount of time on the project**
+* `/spend TIME-RECORD [YYYY-MM-DD]` - announce that you have spent a
+  certain amount of time on the project.  No longer required to be used each day.
 
 * `TIME-RECORD` has the form `XXmoYYwZZdUUhVVm` for `XX` month, `YY`
   weeks `ZZ` days `UU` hours and `VV` minutes.
@@ -172,16 +173,18 @@ good description in Gitlab, but this is another summary:
 Status:
 * `Status::0-Lead` - someone had an idea that this project might be available.  Maybe the final customer hasn't even been talked to yet
 * `Status::0-WaitingForGrant` - RSE services needed if grant is funded (usually includes funding via the grant)
-* `Status::1-Consulting` - Not actively worked on, but the customers drop by occassionally and ask us questions.  Does not require ongoing attention from us
-* `Status::1-Waiting` - We are waiting for the customer to become ready for us to start.  Maybe the customer will contact us when they are ready.  Maybe we have a "follow-up date" at which time we should contact them again.
+* `Status::1-Waiting` - We are waiting for the customer to become ready for us to start (and we haven't done much work yet, other than basic data gathering and advice).  Maybe the customer will contact us when they are ready.  Maybe we have a "follow-up date" at which time we should contact them again.
 * `Status::2-Queued` - We are waiting for time, then we will start this project.
+* `Status::3-Consulting` - Not actively worked on, but the customers drop by occassionally and ask us questions.  Does not require ongoing attention from us
 * `Status::3-InProgress` - We are working on it
 * `Status::3-NeedsReview` - Needs to be checked internally
+* `Status::4-ReWaiting` - work has been done and we are again waiting for a customer to come back to us.
 * `Status::4-Review` - Being checked by the customer
 * `Status::5-Reporting` - Project is done, but all of the stats (timesaved, outputs, etc). are not there yet.
 * `Status::6-Done` - Done, don't need to think about it anymore.
-* `Status::7-Cancelled` - We decided (along with the customer) to not do this project
-* `Status::8-Maintenance` - Project is "done" but the customer will keep coming back to us for support or updates as needed.
+* `Status::7-Maintenance` - Project is "done" but the customer will keep coming back to us for support or updates as needed.
+* `Status::8-Cancelled` - We decided (along with the customer) to not do this project
+* `Status::9-Special` - Issues which should normally be excluded from reports.
 
 Importance (different ways to say what is important):
 * `Imp:1-Strategic`: strategic benefit to the university or RSE team
@@ -195,6 +198,8 @@ Funding:
 * `Funding::Project` - The project is paying for this service itself
 * `Funding::ProjectOffers` - The project would be willing to pay for the service, but isn't doing so for practical reasons (for example, the project is too small for finance to want to deal with it)
 * `Funding::ASC` - similar to `Unit` but it's more of a ASC-internal project, so you could say that ASC is the customer itself.
+* `Funding::Dedicated` - staff who is 100% paid by some project is working on it, so time isn't in finance systems.
+* `Funding::ITS` - IT Services funding is paying for this
 
 Task:
 * Task labels indicate the type of work in the project.  Multi-select,
@@ -204,7 +209,7 @@ Task:
 
 Unit (should only have one of these since it has `::`):
 * From what department are the customers?  Select one, `Unit::NAME`.  Some special cases:
-* `Unit::AaltoGeneral` - stuff that helps everyone
+* `Unit::General` - stuff that helps everyone
 * `Unit::AaltoSciComp` - stuff that helps Science-IT
 * `Unit::RSE` - stuff that helps the RSE service itself
 
