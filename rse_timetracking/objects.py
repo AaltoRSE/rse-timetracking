@@ -14,6 +14,7 @@ class Project():
         self.time_created = None
         self.time_updated = None
         self.time_due = None
+        self.year = None
         self.unit_list = [ ]
         self.size_list = [ ]
         self.importance_list = [ ]

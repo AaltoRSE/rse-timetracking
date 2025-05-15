@@ -7,9 +7,10 @@ from collections import defaultdict
 from datetime import timedelta
 import dateutil
 import itertools
-import pytz
-
 import pickle
+import statistics
+
+import pytz
 import gitlab
 
 from .time import time_to_seconds, parse_time_spent
@@ -126,6 +127,7 @@ def scrape2(args):
 
         parse_body(p, issue.description)
 
+        note_creation_times = [ p.time_created.year ]
         for note in sorted(issue.notes.list(all=True), key=lambda x: x.created_at):
             created_at = dateutil.parser.parse(note.created_at)
             # The "removed time spent" removes ALL past time spent on the
@@ -146,7 +148,10 @@ def scrape2(args):
                     )
 
             parse_body(p, note.body, created_at=created_at)
-
+            if note.body and note.body.strip().split()[0] not in {'assigned', 'changed', 'subtracted'} and note.body.strip()[0] != '/':
+                if len(note.body)<80: print(repr(note.body))
+                note_creation_times.append(created_at.year)
+        p.year = statistics.median_low(note_creation_times)
 
         projects.append(p)
 
@@ -171,7 +176,7 @@ def dataframes(projects):
     Returns a dict of many dataframes.
     """
     columns = ['iid', 'title', 'state', 'assignee', 'unit', 'funding', 'size', 'status', 'imp',
-               'time_created', 'time_due', 'time_updated',
+               'time_created', 'time_due', 'time_updated', 'year',
                #'timeestimate', 'timespent',
                'timeestimate_s',  'timespent_s',
                ]
@@ -188,6 +193,9 @@ def dataframes(projects):
     df_projects['time_due']     = pd.to_datetime(df_projects['time_due'],     utc=True).dt.tz_convert(TZ)
     #df_projects['timespent'] = pd.to_timedelta(df_projects['timespent'], unit='s')
     #df_projects['timeestimate'] = pd.to_timedelta(df_projects['timeestimate'], unit='s')
+    df_projects['unit1'] = df_projects['unit'].str.split(':').str[0]
+    # year is median of year of all comment times
+    df_projects['year1'] = df_projects['time_created'].dt.year
     df_projects.set_index('iid', inplace=True)
     #print(df_projects.info())
 
